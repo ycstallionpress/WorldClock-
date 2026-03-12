@@ -1,0 +1,1149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>World Clock - By Yu Chern</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            padding: 20px;
+            position: relative;
+        }
+        
+        /* Created by Yu Chern - Corner Credit */
+        .created-by {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 25px;
+            border-radius: 50px;
+            font-size: 1.1em;
+            font-weight: bold;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+            z-index: 1000;
+            animation: glow 2s ease-in-out infinite;
+            border: 2px solid rgba(255,215,0,0.5);
+            backdrop-filter: blur(5px);
+        }
+        
+        .created-by:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(255,215,0,0.3);
+        }
+        
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4); }
+            50% { box-shadow: 0 5px 30px rgba(255, 215, 0, 0.6); }
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            text-align: center;
+            color: white;
+            font-size: 3.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            background: linear-gradient(135deg, #ffd700, #ff6b6b, #4ecdc4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-size: 300% 300%;
+            animation: gradient 5s ease infinite;
+        }
+        
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: rgba(255,255,255,0.9);
+            margin-bottom: 40px;
+            font-size: 1.3em;
+        }
+        
+        /* Category Navigation */
+        .category-nav {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin: 30px 0;
+        }
+        
+        .category-btn {
+            background: rgba(255,255,255,0.1);
+            color: white;
+            border: 2px solid rgba(255,255,255,0.2);
+            padding: 15px 30px;
+            font-size: 1.1em;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .category-btn:hover {
+            background: rgba(255,255,255,0.2);
+            transform: translateY(-3px);
+            border-color: #ffd700;
+        }
+        
+        .category-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-color: #ffd700;
+            box-shadow: 0 5px 20px rgba(255,215,0,0.3);
+        }
+        
+        .category-icon {
+            font-size: 1.3em;
+        }
+        
+        /* Region Cards */
+        .region-card {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255,255,255,0.2);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .region-card:hover {
+            transform: translateY(-5px);
+            background: rgba(255,255,255,0.15);
+            border-color: #ffd700;
+        }
+        
+        .region-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .region-title {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .region-icon {
+            font-size: 2.5em;
+        }
+        
+        .region-name {
+            font-size: 2em;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .region-count {
+            background: rgba(255,215,0,0.3);
+            color: #ffd700;
+            padding: 5px 15px;
+            border-radius: 50px;
+            font-size: 0.9em;
+        }
+        
+        .expand-icon {
+            color: #ffd700;
+            font-size: 1.5em;
+            transition: transform 0.3s ease;
+        }
+        
+        .region-card.expanded .expand-icon {
+            transform: rotate(180deg);
+        }
+        
+        /* Time Grid */
+        .time-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            padding: 20px 0;
+            margin-top: 20px;
+        }
+        
+        .time-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            border: 2px solid transparent;
+        }
+        
+        .time-card:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+            border-color: #ffd700;
+        }
+        
+        .time-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, #ffd700, #ff6b6b, #4ecdc4);
+        }
+        
+        .country-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .flag {
+            font-size: 2.5em;
+            margin-right: 15px;
+        }
+        
+        .country-info {
+            flex: 1;
+        }
+        
+        .country-name {
+            font-size: 1.3em;
+            color: #333;
+            font-weight: bold;
+        }
+        
+        .capital {
+            color: #666;
+            font-size: 0.9em;
+        }
+        
+        .time-display {
+            font-size: 2em;
+            font-weight: bold;
+            color: #2a5298;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            text-align: center;
+            background: #f0f8ff;
+            padding: 10px;
+            border-radius: 10px;
+        }
+        
+        .date-display {
+            color: #666;
+            font-size: 0.9em;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        
+        .region-badge {
+            background: #e8f4f8;
+            padding: 3px 8px;
+            border-radius: 15px;
+            font-size: 0.8em;
+            color: #2a5298;
+            display: inline-block;
+        }
+        
+        .controls {
+            text-align: center;
+            margin: 30px 0;
+        }
+        
+        .refresh-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.2em;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+            border: 2px solid #ffd700;
+        }
+        
+        .refresh-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(255,215,0,0.3);
+        }
+        
+        .update-time {
+            text-align: center;
+            color: rgba(255,255,255,0.8);
+            margin-top: 30px;
+            font-size: 0.9em;
+        }
+        
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.8);
+            animation: fadeIn 0.3s;
+        }
+        
+        @keyframes fadeIn {
+            from {opacity: 0}
+            to {opacity: 1}
+        }
+        
+        .modal-content {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            margin: 3% auto;
+            padding: 30px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 700px;
+            color: white;
+            position: relative;
+            animation: slideIn 0.3s;
+            border: 2px solid #ffd700;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        .close {
+            color: #ffd700;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        
+        .close:hover {
+            color: white;
+            transform: scale(1.2);
+        }
+        
+        .modal-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #ffd700;
+            padding-bottom: 20px;
+        }
+        
+        .modal-flag {
+            font-size: 4em;
+            margin-right: 20px;
+        }
+        
+        .modal-title {
+            font-size: 2em;
+            font-weight: bold;
+            color: #ffd700;
+        }
+        
+        .detail-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .detail-item {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 10px;
+        }
+        
+        .detail-label {
+            font-size: 0.9em;
+            color: #ffd700;
+            margin-bottom: 5px;
+        }
+        
+        .detail-value {
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+        
+        .modal-time {
+            font-size: 2.5em;
+            font-weight: bold;
+            text-align: center;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+            background: rgba(255,215,0,0.1);
+            padding: 20px;
+            border-radius: 10px;
+            color: #ffd700;
+        }
+        
+        .fun-fact {
+            background: rgba(255,215,0,0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            border-left: 4px solid #ffd700;
+        }
+        
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.5em;
+            }
+            
+            .category-btn {
+                padding: 10px 20px;
+                font-size: 1em;
+            }
+            
+            .region-name {
+                font-size: 1.5em;
+            }
+            
+            .detail-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .modal-content {
+                margin: 5% auto;
+                padding: 20px;
+            }
+            
+            .created-by {
+                bottom: 10px;
+                right: 10px;
+                padding: 8px 15px;
+                font-size: 0.9em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Created by Yu Chern - Corner Credit -->
+    <div class="created-by">
+        ✨ Created by Yu Chern ✨
+    </div>
+
+    <div class="container">
+        <h1>🌍 World Clock</h1>
+        <p class="subtitle">Click on any region to see countries, or click a country for details</p>
+        
+        <div class="category-nav">
+            <button class="category-btn active" onclick="filterCategory('all')">
+                <span class="category-icon">🌐</span> All Regions
+            </button>
+            <button class="category-btn" onclick="filterCategory('southeast-asia')">
+                <span class="category-icon">🌏</span> Southeast Asia
+            </button>
+            <button class="category-btn" onclick="filterCategory('asia')">
+                <span class="category-icon">🏯</span> Asia
+            </button>
+            <button class="category-btn" onclick="filterCategory('europe')">
+                <span class="category-icon">🏰</span> Europe
+            </button>
+            <button class="category-btn" onclick="filterCategory('americas')">
+                <span class="category-icon">🗽</span> Americas
+            </button>
+            <button class="category-btn" onclick="filterCategory('africa')">
+                <span class="category-icon">🦁</span> Africa
+            </button>
+            <button class="category-btn" onclick="filterCategory('oceania')">
+                <span class="category-icon">🏝️</span> Oceania
+            </button>
+        </div>
+        
+        <div class="controls">
+            <button class="refresh-btn" onclick="updateAllTimes()">🔄 Refresh All Times</button>
+        </div>
+        
+        <div id="regionsContainer">
+            <!-- Regions will be inserted here by JavaScript -->
+        </div>
+        
+        <div class="update-time" id="lastUpdate">
+            Last updated: Just now
+        </div>
+    </div>
+
+    <!-- Modal for details -->
+    <div id="detailModal" class="modal">
+        <div class="modal-content" id="modalContent">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <div id="modalDetails">
+                <!-- Modal content will be inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Complete world countries data by region
+        const regions = {
+            'southeast-asia': {
+                name: 'Southeast Asia',
+                icon: '🌏',
+                countries: [
+                    {
+                        name: "Indonesia",
+                        capital: "Jakarta",
+                        flag: "🇮🇩",
+                        timezone: "Asia/Jakarta",
+                        offset: 7,
+                        population: "273.5 million",
+                        currency: "Indonesian Rupiah (IDR)",
+                        language: "Indonesian",
+                        funFact: "Indonesia has the most volcanoes of any country - over 130 active volcanoes!"
+                    },
+                    {
+                        name: "Malaysia",
+                        capital: "Kuala Lumpur",
+                        flag: "🇲🇾",
+                        timezone: "Asia/Kuala_Lumpur",
+                        offset: 8,
+                        population: "32.7 million",
+                        currency: "Malaysian Ringgit (MYR)",
+                        language: "Malay",
+                        funFact: "The Petronas Twin Towers in Kuala Lumpur were the world's tallest buildings from 1998 to 2004."
+                    },
+                    {
+                        name: "Singapore",
+                        capital: "Singapore",
+                        flag: "🇸🇬",
+                        timezone: "Asia/Singapore",
+                        offset: 8,
+                        population: "5.7 million",
+                        currency: "Singapore Dollar (SGD)",
+                        language: "English, Malay, Mandarin, Tamil",
+                        funFact: "Singapore has the world's first night zoo - the Night Safari!"
+                    },
+                    {
+                        name: "Thailand",
+                        capital: "Bangkok",
+                        flag: "🇹🇭",
+                        timezone: "Asia/Bangkok",
+                        offset: 7,
+                        population: "69.8 million",
+                        currency: "Thai Baht (THB)",
+                        language: "Thai",
+                        funFact: "Thailand is the only Southeast Asian country never to have been colonized by a European power."
+                    },
+                    {
+                        name: "Vietnam",
+                        capital: "Hanoi",
+                        flag: "🇻🇳",
+                        timezone: "Asia/Ho_Chi_Minh",
+                        offset: 7,
+                        population: "97.3 million",
+                        currency: "Vietnamese Dong (VND)",
+                        language: "Vietnamese",
+                        funFact: "Vietnam is the world's largest exporter of cashew nuts and black pepper."
+                    },
+                    {
+                        name: "Philippines",
+                        capital: "Manila",
+                        flag: "🇵🇭",
+                        timezone: "Asia/Manila",
+                        offset: 8,
+                        population: "109 million",
+                        currency: "Philippine Peso (PHP)",
+                        language: "Filipino, English",
+                        funFact: "The Philippines is made up of 7,641 islands!"
+                    },
+                    {
+                        name: "Myanmar",
+                        capital: "Naypyidaw",
+                        flag: "🇲🇲",
+                        timezone: "Asia/Yangon",
+                        offset: 6.5,
+                        population: "54.4 million",
+                        currency: "Burmese Kyat (MMK)",
+                        language: "Burmese",
+                        funFact: "The ancient city of Bagan in Myanmar has over 2,000 temples and pagodas."
+                    },
+                    {
+                        name: "Cambodia",
+                        capital: "Phnom Penh",
+                        flag: "🇰🇭",
+                        timezone: "Asia/Phnom_Penh",
+                        offset: 7,
+                        population: "16.7 million",
+                        currency: "Cambodian Riel (KHR)",
+                        language: "Khmer",
+                        funFact: "Angkor Wat is the largest religious monument in the world!"
+                    },
+                    {
+                        name: "Laos",
+                        capital: "Vientiane",
+                        flag: "🇱🇦",
+                        timezone: "Asia/Vientiane",
+                        offset: 7,
+                        population: "7.3 million",
+                        currency: "Lao Kip (LAK)",
+                        language: "Lao",
+                        funFact: "Laos is the only landlocked country in Southeast Asia."
+                    },
+                    {
+                        name: "Brunei",
+                        capital: "Bandar Seri Begawan",
+                        flag: "🇧🇳",
+                        timezone: "Asia/Brunei",
+                        offset: 8,
+                        population: "437,000",
+                        currency: "Brunei Dollar (BND)",
+                        language: "Malay",
+                        funFact: "Brunei has one of the highest living standards in Asia due to its oil and gas resources."
+                    },
+                    {
+                        name: "East Timor",
+                        capital: "Dili",
+                        flag: "🇹🇱",
+                        timezone: "Asia/Dili",
+                        offset: 9,
+                        population: "1.3 million",
+                        currency: "US Dollar (USD)",
+                        language: "Tetum, Portuguese",
+                        funFact: "East Timor was the first new sovereign state of the 21st century, gaining independence in 2002."
+                    }
+                ]
+            },
+            'asia': {
+                name: 'Asia',
+                icon: '🏯',
+                countries: [
+                    {
+                        name: "Japan",
+                        capital: "Tokyo",
+                        flag: "🇯🇵",
+                        timezone: "Asia/Tokyo",
+                        offset: 9,
+                        population: "125.8 million",
+                        currency: "Japanese Yen (JPY)",
+                        language: "Japanese",
+                        funFact: "Japan has more than 6,800 islands!"
+                    },
+                    {
+                        name: "China",
+                        capital: "Beijing",
+                        flag: "🇨🇳",
+                        timezone: "Asia/Shanghai",
+                        offset: 8,
+                        population: "1.41 billion",
+                        currency: "Chinese Yuan (CNY)",
+                        language: "Mandarin",
+                        funFact: "China is home to the world's largest palace - the Forbidden City."
+                    },
+                    {
+                        name: "India",
+                        capital: "New Delhi",
+                        flag: "🇮🇳",
+                        timezone: "Asia/Kolkata",
+                        offset: 5.5,
+                        population: "1.38 billion",
+                        currency: "Indian Rupee (INR)",
+                        language: "Hindi, English",
+                        funFact: "India has the world's largest postal network with over 150,000 post offices."
+                    },
+                    {
+                        name: "South Korea",
+                        capital: "Seoul",
+                        flag: "🇰🇷",
+                        timezone: "Asia/Seoul",
+                        offset: 9,
+                        population: "51.7 million",
+                        currency: "South Korean Won (KRW)",
+                        language: "Korean",
+                        funFact: "South Korea has the world's fastest internet speeds."
+                    },
+                    {
+                        name: "United Arab Emirates",
+                        capital: "Abu Dhabi",
+                        flag: "🇦🇪",
+                        timezone: "Asia/Dubai",
+                        offset: 4,
+                        population: "9.9 million",
+                        currency: "UAE Dirham (AED)",
+                        language: "Arabic",
+                        funFact: "Dubai has the world's tallest building, the Burj Khalifa."
+                    }
+                ]
+            },
+            'europe': {
+                name: 'Europe',
+                icon: '🏰',
+                countries: [
+                    {
+                        name: "United Kingdom",
+                        capital: "London",
+                        flag: "🇬🇧",
+                        timezone: "Europe/London",
+                        offset: 1,
+                        population: "67.2 million",
+                        currency: "Pound Sterling (GBP)",
+                        language: "English",
+                        funFact: "The London Underground is the world's oldest underground railway network."
+                    },
+                    {
+                        name: "Germany",
+                        capital: "Berlin",
+                        flag: "🇩🇪",
+                        timezone: "Europe/Berlin",
+                        offset: 2,
+                        population: "83.2 million",
+                        currency: "Euro (EUR)",
+                        language: "German",
+                        funFact: "Germany has over 1,500 types of beer!"
+                    },
+                    {
+                        name: "France",
+                        capital: "Paris",
+                        flag: "🇫🇷",
+                        timezone: "Europe/Paris",
+                        offset: 2,
+                        population: "67.4 million",
+                        currency: "Euro (EUR)",
+                        language: "French",
+                        funFact: "France is the most visited country in the world."
+                    },
+                    {
+                        name: "Italy",
+                        capital: "Rome",
+                        flag: "🇮🇹",
+                        timezone: "Europe/Rome",
+                        offset: 2,
+                        population: "60.3 million",
+                        currency: "Euro (EUR)",
+                        language: "Italian",
+                        funFact: "Italy has the most UNESCO World Heritage sites in the world."
+                    },
+                    {
+                        name: "Spain",
+                        capital: "Madrid",
+                        flag: "🇪🇸",
+                        timezone: "Europe/Madrid",
+                        offset: 2,
+                        population: "47.4 million",
+                        currency: "Euro (EUR)",
+                        language: "Spanish",
+                        funFact: "Spain has the third largest number of UNESCO World Heritage sites."
+                    }
+                ]
+            },
+            'americas': {
+                name: 'Americas',
+                icon: '🗽',
+                countries: [
+                    {
+                        name: "United States",
+                        capital: "Washington, D.C.",
+                        flag: "🇺🇸",
+                        timezone: "America/New_York",
+                        offset: -4,
+                        population: "331 million",
+                        currency: "US Dollar (USD)",
+                        language: "English",
+                        funFact: "The US has the world's largest economy."
+                    },
+                    {
+                        name: "Canada",
+                        capital: "Ottawa",
+                        flag: "🇨🇦",
+                        timezone: "America/Toronto",
+                        offset: -4,
+                        population: "38 million",
+                        currency: "Canadian Dollar (CAD)",
+                        language: "English, French",
+                        funFact: "Canada has the longest coastline of any country in the world."
+                    },
+                    {
+                        name: "Brazil",
+                        capital: "Brasília",
+                        flag: "🇧🇷",
+                        timezone: "America/Sao_Paulo",
+                        offset: -3,
+                        population: "213 million",
+                        currency: "Brazilian Real (BRL)",
+                        language: "Portuguese",
+                        funFact: "Brazil has the world's largest rainforest - the Amazon."
+                    },
+                    {
+                        name: "Mexico",
+                        capital: "Mexico City",
+                        flag: "🇲🇽",
+                        timezone: "America/Mexico_City",
+                        offset: -5,
+                        population: "128 million",
+                        currency: "Mexican Peso (MXN)",
+                        language: "Spanish",
+                        funFact: "Mexico introduced chocolate, chilies, and corn to the world."
+                    },
+                    {
+                        name: "Argentina",
+                        capital: "Buenos Aires",
+                        flag: "🇦🇷",
+                        timezone: "America/Argentina/Buenos_Aires",
+                        offset: -3,
+                        population: "45 million",
+                        currency: "Argentine Peso (ARS)",
+                        language: "Spanish",
+                        funFact: "Argentina is the birthplace of tango dance."
+                    }
+                ]
+            },
+            'africa': {
+                name: 'Africa',
+                icon: '🦁',
+                countries: [
+                    {
+                        name: "South Africa",
+                        capital: "Pretoria",
+                        flag: "🇿🇦",
+                        timezone: "Africa/Johannesburg",
+                        offset: 2,
+                        population: "59.3 million",
+                        currency: "South African Rand (ZAR)",
+                        language: "11 official languages",
+                        funFact: "South Africa has three capital cities!"
+                    },
+                    {
+                        name: "Egypt",
+                        capital: "Cairo",
+                        flag: "🇪🇬",
+                        timezone: "Africa/Cairo",
+                        offset: 2,
+                        population: "102 million",
+                        currency: "Egyptian Pound (EGP)",
+                        language: "Arabic",
+                        funFact: "The Great Pyramid of Giza is the only remaining wonder of the ancient world."
+                    },
+                    {
+                        name: "Kenya",
+                        capital: "Nairobi",
+                        flag: "🇰🇪",
+                        timezone: "Africa/Nairobi",
+                        offset: 3,
+                        population: "53.7 million",
+                        currency: "Kenyan Shilling (KES)",
+                        language: "Swahili, English",
+                        funFact: "Kenya hosts the world's greatest wildlife spectacle - the Great Migration."
+                    },
+                    {
+                        name: "Morocco",
+                        capital: "Rabat",
+                        flag: "🇲🇦",
+                        timezone: "Africa/Casablanca",
+                        offset: 1,
+                        population: "36.9 million",
+                        currency: "Moroccan Dirham (MAD)",
+                        language: "Arabic, Berber",
+                        funFact: "Morocco has a city that's entirely blue - Chefchaouen."
+                    },
+                    {
+                        name: "Nigeria",
+                        capital: "Abuja",
+                        flag: "🇳🇬",
+                        timezone: "Africa/Lagos",
+                        offset: 1,
+                        population: "206 million",
+                        currency: "Nigerian Naira (NGN)",
+                        language: "English",
+                        funFact: "Nigeria has the highest number of twin births in the world."
+                    }
+                ]
+            },
+            'oceania': {
+                name: 'Oceania',
+                icon: '🏝️',
+                countries: [
+                    {
+                        name: "Australia",
+                        capital: "Canberra",
+                        flag: "🇦🇺",
+                        timezone: "Australia/Sydney",
+                        offset: 10,
+                        population: "25.7 million",
+                        currency: "Australian Dollar (AUD)",
+                        language: "English",
+                        funFact: "Australia has more kangaroos than people!"
+                    },
+                    {
+                        name: "New Zealand",
+                        capital: "Wellington",
+                        flag: "🇳🇿",
+                        timezone: "Pacific/Auckland",
+                        offset: 12,
+                        population: "5.1 million",
+                        currency: "New Zealand Dollar (NZD)",
+                        language: "English, Māori",
+                        funFact: "New Zealand was the first country to give women the right to vote."
+                    },
+                    {
+                        name: "Fiji",
+                        capital: "Suva",
+                        flag: "🇫🇯",
+                        timezone: "Pacific/Fiji",
+                        offset: 12,
+                        population: "896,000",
+                        currency: "Fijian Dollar (FJD)",
+                        language: "Fijian, English",
+                        funFact: "Fiji is made up of over 330 islands."
+                    },
+                    {
+                        name: "Papua New Guinea",
+                        capital: "Port Moresby",
+                        flag: "🇵🇬",
+                        timezone: "Pacific/Port_Moresby",
+                        offset: 10,
+                        population: "8.9 million",
+                        currency: "Papua New Guinean Kina (PGK)",
+                        language: "Tok Pisin, English",
+                        funFact: "Papua New Guinea has over 800 indigenous languages!"
+                    }
+                ]
+            }
+        };
+
+        let currentFilter = 'all';
+        let expandedRegions = {};
+
+        // Function to get time in specific timezone
+        function getTimeInTimezone(timezone) {
+            try {
+                const now = new Date();
+                return {
+                    time: now.toLocaleString('en-US', { 
+                        timeZone: timezone,
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        second: '2-digit',
+                        hour12: true
+                    }),
+                    date: now.toLocaleString('en-US', { 
+                        timeZone: timezone,
+                        weekday: 'long',
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                    }),
+                    fullDateTime: now.toLocaleString('en-US', { 
+                        timeZone: timezone,
+                        weekday: 'long',
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        second: '2-digit',
+                        hour12: true
+                    })
+                };
+            } catch (e) {
+                const now = new Date();
+                return {
+                    time: now.toLocaleTimeString('en-US', { 
+                        hour: '2-digit', 
+                        minute: '2-digit', 
+                        second: '2-digit',
+                        hour12: true 
+                    }),
+                    date: now.toLocaleDateString('en-US', { 
+                        weekday: 'long',
+                        year: 'numeric', 
+                        month: 'long', 
+                        day: 'numeric' 
+                    }),
+                    fullDateTime: now.toLocaleString('en-US')
+                };
+            }
+        }
+
+        // Function to create country card HTML
+        function createCountryCard(country, regionName) {
+            const timeData = getTimeInTimezone(country.timezone);
+            return `
+                <div class="time-card" onclick='showCountryDetails(${JSON.stringify(country).replace(/'/g, "&#39;")}, "${regionName}")'>
+                    <div class="country-header">
+                        <span class="flag">${country.flag}</span>
+                        <div class="country-info">
+                            <div class="country-name">${country.name}</div>
+                            <div class="capital">🏛️ ${country.capital}</div>
+                        </div>
+                    </div>
+                    <div class="time-display">${timeData.time}</div>
+                    <div class="date-display">📅 ${timeData.date}</div>
+                    <div class="region-badge">${regionName}</div>
+                </div>
+            `;
+        }
+
+        // Function to toggle region expansion
+        function toggleRegion(regionKey) {
+            expandedRegions[regionKey] = !expandedRegions[regionKey];
+            renderRegions();
+        }
+
+        // Function to render all regions
+        function renderRegions() {
+            const container = document.getElementById('regionsContainer');
+            container.innerHTML = '';
+
+            Object.entries(regions).forEach(([key, region]) => {
+                if (currentFilter === 'all' || currentFilter === key) {
+                    const isExpanded = expandedRegions[key] || false;
+                    
+                    let countriesHtml = '';
+                    if (isExpanded) {
+                        countriesHtml = '<div class="time-grid">';
+                        region.countries.forEach(country => {
+                            countriesHtml += createCountryCard(country, region.name);
+                        });
+                        countriesHtml += '</div>';
+                    }
+
+                    const regionHtml = `
+                        <div class="region-card ${isExpanded ? 'expanded' : ''}" onclick="toggleRegion('${key}')">
+                            <div class="region-header">
+                                <div class="region-title">
+                                    <span class="region-icon">${region.icon}</span>
+                                    <span class="region-name">${region.name}</span>
+                                    <span class="region-count">${region.countries.length} countries</span>
+                                </div>
+                                <span class="expand-icon">${isExpanded ? '▼' : '▶'}</span>
+                            </div>
+                            ${countriesHtml}
+                        </div>
+                    `;
+                    
+                    container.innerHTML += regionHtml;
+                }
+            });
+        }
+
+        // Function to filter categories
+        function filterCategory(category) {
+            currentFilter = category;
+            
+            // Update active button
+            document.querySelectorAll('.category-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            renderRegions();
+        }
+
+        // Function to show country details
+        function showCountryDetails(country, regionName) {
+            const timeData = getTimeInTimezone(country.timezone);
+            
+            const modalDetails = document.getElementById('modalDetails');
+            modalDetails.innerHTML = `
+                <div class="modal-header">
+                    <span class="modal-flag">${country.flag}</span>
+                    <span class="modal-title">${country.name}</span>
+                </div>
+                
+                <div class="modal-time">${timeData.time}</div>
+                
+                <div class="detail-grid">
+                    <div class="detail-item">
+                        <div class="detail-label">Capital City</div>
+                        <div class="detail-value">🏛️ ${country.capital}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Region</div>
+                        <div class="detail-value">${regionName}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Population</div>
+                        <div class="detail-value">👥 ${country.population}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Currency</div>
+                        <div class="detail-value">💰 ${country.currency}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Official Language</div>
+                        <div class="detail-value">🗣️ ${country.language}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Time Zone</div>
+                        <div class="detail-value">🕐 GMT ${country.offset >= 0 ? '+' : ''}${country.offset}</div>
+                    </div>
+                </div>
+                
+                <div class="detail-item" style="grid-column: span 2;">
+                    <div class="detail-label">Current Date & Time</div>
+                    <div class="detail-value">📅 ${timeData.fullDateTime}</div>
+                </div>
+                
+                <div class="fun-fact">
+                    <strong>🎯 Fun Fact:</strong> ${country.funFact}
+                </div>
+            `;
+            
+            document.getElementById('detailModal').style.display = 'block';
+        }
+
+        // Function to close modal
+        function closeModal() {
+            document.getElementById('detailModal').style.display = 'none';
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('detailModal');
+            if (event.target == modal) {
+                modal.style.display = 'none';
+            }
+        }
+
+        // Function to update all times
+        function updateAllTimes() {
+            renderRegions();
+            const now = new Date();
+            document.getElementById('lastUpdate').innerHTML = 
+                `Last updated: ${now.toLocaleTimeString()}`;
+        }
+
+        // Initialize expanded regions (Southeast Asia expanded by default)
+        expandedRegions['southeast-asia'] = true;
+
+        // Update every second
+        setInterval(updateAllTimes, 1000);
+
+        // Initial load
+        renderRegions();
+    </script>
+</body>
+</html>
